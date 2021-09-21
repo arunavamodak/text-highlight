@@ -88,7 +88,7 @@ import HighlightPop from "react-highlight-pop";
 import data from './sample.json';
 import './App.css';
 import { useSelector, useDispatch } from "react-redux";
-import { addMarker } from "./Actions/action";
+import { addMarker, removeMarker } from "./Actions/action";
 
 function App() {
   const dispatch = useDispatch();
@@ -97,7 +97,7 @@ function App() {
 
   useEffect(() => {
     markers.forEach((item) => {
-      let node = highlightRange(item.selection);
+      let node = highlightRange(item.selection, item.id);
 
       let range = item.selection;
 
@@ -111,7 +111,7 @@ function App() {
     let userSelection = window.getSelection();
 
     const temp = {
-      id: new Date(),
+      id: new Date().toString(),
       text: userSelection.toString(),
       selection: userSelection.getRangeAt(0),
       section: userSelection.anchorNode.parentNode.id,
@@ -120,7 +120,7 @@ function App() {
     dispatch(addMarker(temp));
   }
 
-  function highlightRange(range) {
+  function highlightRange(range, id) {
     let newNode = document.createElement("span");
 
     newNode.setAttribute("style", "background-color: yellow;");
@@ -129,6 +129,7 @@ function App() {
       let contents = document.createTextNode(newNode.innerText).wholeText;
       if (window.confirm("Do you want to deselect it?")) {
         deletenode(newNode, contents);
+        dispatch(removeMarker(id));
       }
     };
     newNode.appendChild(range.cloneContents());
