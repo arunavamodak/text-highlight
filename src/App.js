@@ -93,9 +93,14 @@ import { addMarker, removeMarker } from "./Actions/action";
 function App() {
   const dispatch = useDispatch();
 
+  console.log(data["_source"]["fullText"]);
+
+  const sections = data["_source"]["fullText"];
+
   const markers = useSelector(state => state.markers.markers);
 
   useEffect(() => {
+
     markers.forEach((item) => {
       let node = highlightRange(item.selection, item.id);
 
@@ -113,8 +118,8 @@ function App() {
     const temp = {
       id: new Date().toString(),
       text: userSelection.toString(),
-      selection: userSelection.getRangeAt(0),
-      section: userSelection.anchorNode.parentNode.id,
+      selection: userSelection.getRangeAt(0), //range
+      section: userSelection.anchorNode.parentNode.parentNode.id, //id of the section
     };
 
     dispatch(addMarker(temp));
@@ -146,17 +151,43 @@ function App() {
       <HighlightPop
         popoverItems={(itemClass) => (
           <>
-            <span className={itemClass} onClick={() => highlightSelection()}>
+            <span className={itemClass} onClick={(e) => {
+              highlightSelection();
+            }}>
               select
             </span>
           </>
         )}
       >
-        <h1>Introduction</h1>
+        {
+          sections.map(item => {
+            return (
+              <div style={{ marginBottom: "60px" }} key={item.title}>
+                <h1>{item.title}</h1>
+                <div id={item.title} dangerouslySetInnerHTML={{ __html: item["content"] }} />
+                {
+                  item.children.length > 0 ?
+                    (
+                      item.children.map(child => {
+                        return (
+                          <div style={{ marginBottom: "30px" }}>
+                            <h3>{child.title}</h3>
+                            <div id={item.title + child.title} dangerouslySetInnerHTML={{ __html: child["content"] }} />
+                          </div>
+                        )
+                      })
+                    ) : null
+                }
+              </div>
+            )
+          })
+        }
+
+        {/* <h1>Introduction</h1>
         <p id="introduction" style={{ lineHeight: "25px" }}>{data.Introduction.Content}</p>
         <br />
         <h1>Conclusion</h1>
-        <p id="conclusion" style={{ lineHeight: "25px" }}>{data.Conclusion.Content}</p>
+        <p id="conclusion" style={{ lineHeight: "25px" }}>{data.Conclusion.Content}</p> */}
       </HighlightPop>
     </div>
   );
